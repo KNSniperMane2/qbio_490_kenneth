@@ -5,7 +5,7 @@ date: 07/16/22
 ---
 
 ```{r setup}
-    knitr::opts_knit$set(root.dir = normalizePath("/PATH/TO/DIRECTORY")) 
+    knitr::opts_knit$set(root.dir = normalizePath("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth"))
 ```
 
 Answer the following questions to the best of your ability. DO NOT use loops in your implementation (it isn't necessary for any of these questions). If you have questions, be sure to reach out to Nicole/TAs via GitHub issues, or attend office hours! We're always are happy to help!
@@ -31,12 +31,16 @@ Use is.na() to identify any rows with missing $station data (recall that the dol
 
 ```{r}
 # write code here
+na_boolean_mask = is.na(attenu$station)
+print(na_boolean_mask)
 ```
 
 Use the sum() function on na_boolean_mask. What does this number represent? Remember this value for later (you can save it in a variable if you would like).
 
 ```{r}
 # write code here
+sum(na_boolean_mask)
+#This represents the number of values in the station column of the attenu data frame that were "NA".
 ```
 
 Remember that boolean values are TRUEs and FALSEs. A boolean mask is a vector of boolean values that can be applied to a data frame within the df[row, column] notation. If you apply the mask in the row section df[mask , ] then R will go through all of the rows of your data frame and check if the corresponding value in the boolean mask vector is a TRUE or a FALSE. TRUE rows are selected, and FALSE rows are ignored. The syntax is as follows:
@@ -54,19 +58,23 @@ THINK: When using is.na(), are NA values assigned TRUE or FALSE? With this infor
 ```{r}
 # write code here
 
-attenu_cleaned <- FILL IN HERE
+attenu_cleaned <- attenu[!na_boolean_mask, ]
 ```
 
 View your attenu_cleaned data frame to confirm you have cleaned it as intended. There should be no NA values in the station column.
 
 ```{r}
 # write code here
+print(attenu_cleaned)
 ```
 
 Use the function nrow() to count the number of rows in attenu and attenu_cleaned. Given the number of TRUEs and FALSEs in na_boolean_mask, do these values make sense? What is the relationship between these numbers?
 
 ```{r}
 # write code here
+nrow(attenu)
+nrow(attenu_cleaned)
+#These values make sense since the attenu_cleaned data frame is the attenu data frame with rows containing "NA" for station removed, so attenu_cleaned has less rows than attenu.
 ```
 
 ###### (2) Plotting
@@ -77,12 +85,14 @@ Create a boxplot that splits the sepal length data into groups by species. For h
 
 ```{r}
 # write code here
+boxplot(iris$Sepal.Length ~ iris$Species, xlab = "Species", ylab = "Sepal Length", main = "Sepal Lengths for Flower Species")
 ```
 
 Create a histogram of petal length.
 
 ```{r}
 # write code here
+hist(iris$Petal.Length, main = "Frequency of Petal Lengths", xlab = "Petal Lengths")
 ```
 
 Choose any two columns from the iris data set. Create a scatterplot that compares these columns, color coded based on the values relative to the column means. Follow these steps to create your plot:
@@ -101,12 +111,27 @@ Note: If you write multiple plotting lines, they will all show up on top of each
 
 ```{r}
 # write code here
+mean(iris$Sepal.Width)
+mean(iris$Sepal.Length)
+colors = ifelse(iris$Sepal.Width >= mean(iris$Sepal.Width) & iris$Sepal.Length >= mean(iris$Sepal.Length), "red", 
+  ifelse(iris$Sepal.Width >= mean(iris$Sepal.Width) & iris$Sepal.Length <= mean(iris$Sepal.Length), "orange",
+  ifelse(iris$Sepal.Width <= mean(iris$Sepal.Width) & iris$Sepal.Length <= mean(iris$Sepal.Length), "yellow", "green"
+  )))
+colors = factor(colors)
+print(cor.test(iris$Sepal.Width, iris$Sepal.Length))
+plot(x = iris$Sepal.Width, y = iris$Sepal.Length, col = colors)
+abline(v = mean(iris$Sepal.Width))
+abline(h = mean(iris$Sepal.Length))
 ```
 
 Create a Draftsman's or Pairs Scatter Plot that looks at the sepal length, sepal width, petal length, and petal width colored by the species. You can play around with various other arguments to make this plot as readable as possible. (HINT: Google how to color by factor with the "col" argument)
 
 ```{r}
-# write code here
+# write code 
+colors2 = ifelse(iris$Species == "setosa", "red", 
+  ifelse(iris$Species == "versicolor", "orange", "yellow"))
+colors2 = factor(colors2)
+plot(iris[, 1:4], col = colors2)
 ```
 
 The Draftsman's plot above is interesting since it looks like using these four measurements, a fairly accurate species prediction can be made! This is an example of a cluster analysis, and you can use a plot like this one later on to explore cancer predictors.
@@ -123,6 +148,7 @@ Save the attenu_cleaned to your desktop, then view it from your GUI.
 
 ```{r}
 # write code here
+write.csv(attenu_cleaned, "C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/attenu_cleaned.csv")
 ```
 
 Along with writing files, we oftentimes want to read files into our R environment. These files could be previously saved result files, raw data, etc. We read in csv files using read.csv() as follows:
@@ -137,6 +163,7 @@ Read in your attenu_cleaned file to a data frame called attenu_read_in. We won't
 
 ```{r}
 # write code here
+df <- read.csv("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/attenu_cleaned.csv", header = TRUE)
 ```
 
 We also oftentimes want to save our plots. You can do this as follows:
@@ -152,6 +179,9 @@ Adapt your histogram plot to be saved to your desktop.
 
 ```{r}
 # write code here
+jpeg("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/petalLengths.jpeg")
+hist(iris$Petal.Length, main = "Frequency of Petal Lengths", xlab = "Petal Lengths")
+dev.off()
 ```
 
 ###### (4) Looking Ahead
