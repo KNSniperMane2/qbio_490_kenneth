@@ -35,8 +35,8 @@ clinical <- GDCprepare_clinic(query = clinical_query, clinical.info = "patient")
 There are many factors to explore in the clinical data, but for now, we will be focusing on age. Early onset breast cancer (typically defined as < 45 or < 50 years old) is often associated with a more aggressive tumor type as well as a poorer prognosis.
 
 Look up "early onset breast cancer" in Google Scholar and pick a paper to skim.
-    1. Link to paper:
-    2. What is one thing you learned from this paper: 
+    1. Link to paper: https://www.nature.com/articles/bjc1997223
+    2. What is one thing you learned from this paper: The paper suggests that age doesn't affect one's chances of cancer survival, although certain age groups are more inclined to have certain types of cancers.
     
 Let's start with an overview of the age data. Run the following functions on the age_at_initial_pathologic_diagnosis column. Record the output below.
     1. min() = 26
@@ -77,7 +77,7 @@ age_mask <- ifelse(clinical$age_at_initial_pathologic_diagnosis < 50, TRUE, FALS
 ```
 
 Call the sum function on age_mask. Remember that TRUEs are treated as 1, and FALSEs are treated as 0. Knowing this, what will your sum represent?
-    1. Sum = 
+    1. Sum = 309
 
 ```{r}
 # write code here
