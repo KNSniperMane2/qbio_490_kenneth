@@ -215,20 +215,20 @@ TTN_counts <- as.numeric(rna_counts[TTN_mask, ])
 Call summary() on geneA_counts and geneB_counts. Record the output below:
 
   Gene A (TP53)
-    ~ Min.: 24.0
-    ~ 1st Qu.: 552.2
-    ~ Median: 1033.0
-    ~ Mean: 1607.7
-    ~ 3rd Qu.: 1721.8
-    ~ Max.: 26910.0
+    ~ Min.: 274
+    ~ 1st Qu.: 2894
+    ~ Median: 4444
+    ~ Mean: 5001
+    ~ 3rd Qu.: 6494
+    ~ Max.: 25897
     
   Gene B (TTN)
-  ~ Min.: 42.0
-  ~ 1st Qu.: 174.0
-  ~ Median: 265.5
-  ~ Mean: 326.7
-  ~ 3rd Qu.: 408.8
-  ~ Max.: 10884.0
+  ~ Min.: 18.0
+  ~ 1st Qu.: 223.8
+  ~ Median: 385.0
+  ~ Mean: 652.8
+  ~ 3rd Qu.: 662.0
+  ~ Max.: 75887.0
 
 ```{r}
 # write code here
