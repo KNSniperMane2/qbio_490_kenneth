@@ -101,6 +101,16 @@ low_counts_mask <- ifelse(row_sums >= 10, TRUE, FALSE)
 rna_counts <- rna_counts[low_counts_mask, ]
 ```
 
+```{r}
+#Additional code cleanup
+#rna_clinical = rna_clinical[, 3:88]
+#rownames(rna_clinical) = rna_clinical$barcode
+#colnames(rna_counts) <- gsub(".", "-", colnames(rna_counts), fixed = TRUE)
+#rownames(rna_counts) = rna_counts$X
+#rna_counts = rna_counts[, 2:1083]
+```
+
+
 Now we're ready for the analysis!
 
 ###### (2) Running DESeq2
@@ -120,18 +130,27 @@ To break down what analysis actually takes place within the DESeq2 pipeline:
 
 
 
-dds = DESeqDataSetFromMatrix(countData = rna_counts[,2:1083],
+dds = DESeqDataSetFromMatrix(countData = rna_counts,
                              colData = rna_clinical, design = ~age_category + ajcc_pathologic_stage +paper_BRCA_Subtype_PAM50)
 
 ?DESeq
 dds_obj = DESeq(dds) # note: this will likely take a long time (ie 45 minutes to 2 hours)
+
+factor(rna_clinical$age_category)
+factor(rna_clinical$ajcc_pathologic_stage)
+factor(rna_clinical$paper_BRCA_Subtype_PAM50)
 
 ?resultsNames
 resultsNames(dds_obj)  # see what comparisons got run
 
 # get the young vs. old comparison
 ?results
-results = results(dds_obj, format = "DataFrame", contrast = c("age_category", "ajcc_pathologic_stage", "paper_BRCA_Subtype_PAM50")) # this is case sensitive so be careful!
+results = results(dds_obj, format = "DataFrame", contrast = c("age_category", "young", "old"))
+
+# this is case sensitive so be careful!
+
+load("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/deseq_output.RData")          
+
 ```
 
 ###### (3) Analyzing and saving the data
@@ -140,6 +159,9 @@ First, explore the results df using head(), View(), and dim().
 
 ```{r}
 # write code here
+head(results)
+View(results)
+dim(results)
 ```
 
 We're not interested in all of these columns, so use data.frame() to rewrite results with the following columns in this order: gene name (from rna_genes), gene id (from results rownames), log2foldchange, pvalue, padj, -log10(padj).
@@ -150,11 +172,12 @@ Rename the columns using colnames(). Note: to get -log10, simply write "-log10(f
 
 ```{r}
 # write code here
-results <- data.frame(FILL IN HERE)
+mask = ifelse(rna_genes$gene_id %in% rownames(results), TRUE, FALSE)
+results <- data.frame(rna_genes$gene_name[mask], rownames(results), results$log2FoldChange, results$pvalue, results$padj, -log10(results$padj))
 
 # HINT: to get the gene names, you will need to create a boolean mask that is T when rna_genes$gene_id %in% results@rownames, and F if otherwise, then use this mask to subset rna_genes$gene_names for only the names that are in the results df
 
-colnames(results) <- c("fill in column 1 name", "fill in column 2 name", "etc.") ## FIX
+colnames(results) <- c("gene_name", "gene_id", "log2FoldChange", "pvalue", "padj", "-log10(padj)") ## FIX
 ```
 
 It's oftentimes most interesting to look at genes that are highly over/under expressed at a significance level p < 0.05. 
@@ -162,7 +185,7 @@ It's oftentimes most interesting to look at genes that are highly over/under exp
 First, select rows (genes) that have a padj value < 0.05.
 
 ```{r}
-sig_results <- FILL IN HERE
+sig_results <- ifelse(results$padj < 0.05, TRUE, FALSE)
 ```
 
 Now, sort the data frame by log2foldchange, ascending. To do this, use the order() function. The order() function returns a vector of the sorted indexes of your chosen data, from smallest to largest. For example:
@@ -184,51 +207,67 @@ my_df # check your df to see if it is sorted by the y values
 Use the logic above as well as the sig_results mask to sort the results df by log2foldchange ascending. Note that this can also be done in one line by bypassing the use of order_indexes as an intermediate variable.
 
 ```{r}
-up_reg_results <-
+sig_results_df = results[sig_results, ]
+ordered_indices = order(sig_results_df$log2FoldChange)
+up_reg_results <- sig_results_df[ordered_indices, ]
 ```
 
 Rewrite up_sig_results to have only the genes where the log2foldchange is > 1 (ie genes that are 2x or greater expressed in one population over the other).
 
 ```{r}
 # write code here
+up_reg_results = up_reg_results[up_reg_results$log2FoldChange > 1, ]
 ```
 
 Repeat the same steps to create a data frame called down_reg_results (this time select for all genes where log2foldchange is < -1). Note that you can set the decreasing argument to true in the order() function.
 
 ```{r}
 # write code here
+ordered_indices_decreasing = order(sig_results_df$log2FoldChange, decreasing = TRUE)
+down_reg_results = sig_results_df[ordered_indices_decreasing, ]
+down_reg_results = down_reg_results[down_reg_results$log2FoldChange < -1, ]
 ```
 
 Call head() on both up_reg_results and down_reg_results.
 
 ```{r}
 # write code here
+head(up_reg_results)
+head(down_reg_results)
 ```
 
 Notice that the row names are the old indexes from before we sorted. Create new row names that are more descriptive. 
 
 ```{r}
 # write code here
+row.names(up_reg_results) = 1:16931
+row.names(down_reg_results) = 1:17101
 ```
 
 Call head() again, and choose one up regulated (overexpressed) gene and one down regulated (underexpressed) gene and fill out the following information:
 
-Gene ensembl id:
-Log2FoldChange:
-p-adj value:
-More highly expressed in young or old patients:
+Gene ensembl id: ENSG00000244155.1
+Log2FoldChange: 1.001071
+p-adj value: 3.351962e-02
+More highly expressed in young or old patients: young
 Google the gene. What is its full name, and what appears to be its function? Genecards generally has a pretty good summary:
+The gene Cytochrome P450 Family 4 Subfamily F Member 34 (CYP4F34P) acts as a pseudogene, meaning that it is not actually a functional gene.
 
-Gene ensembl id:
-Log2FoldChange:
-p-adj value:
-More highly expressed in young or old patients:
+Gene ensembl id: ENSG00000266977.2
+Log2FoldChange: -1.000077
+p-adj value: 0.0098254435
+More highly expressed in young or old patients: old
 Google the gene. What is its full name, and what appears to be its function? Genecards generally has a pretty good summary:
-
+The gene NONHSAG043414.2 (AC006504.2) does not appear to have a known function.
 Write the results, up_reg_results, and down_reg_results df's to analysis_data using write.csv().
 
 ```{r}
 # write code here
+head(up_reg_results)
+head(down_reg_results)
+write.csv(results, "C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_DESeq2_results.csv")
+write.csv(up_reg_results, "C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_DESeq2_up_reg_results.csv")
+write.csv(down_reg_results, "C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_DESeq2_down_reg_results.csv")
 ```
 
 ###### (4) Creating volcano plots
@@ -239,17 +278,21 @@ The x-axis is log2FoldChange (ie the normalized fold change results), and the y 
 
 First, think conceptually about which points in the volcano plot are the most interesting. Fill out the relative expression (up-regulated/down-regulated in young patients) and significance (yes/no) for the following locations on the volcano plot:
 
-top-right genes:
-bottom-right genes:
-top-left genes:
-bottom-left genes:
-top-middle genes:
-bottom-middle genes:
+top-right genes: up-regulated in young patients, significant
+bottom-right genes: up-regulated in young patients, not significant
+top-left genes: up-regulated in old patients, significant
+bottom-left genes: up-regulated in old patients, not significant
+top-middle genes: no difference in regulation, significant
+bottom-middle genes: no difference in regulation, not significant
 
 There are many general plotting functions you can use to create a volcano plot (ex: plot(), gglot(), etc.), but we are going to use a specialized function made particularly for volcano plots as it allows for more customization. Install and load "EnhancedVolcano".
 
 ```{r}
 # install (using BiocManager) and load "EnhancedVolcano"
+if (!requireNamespace("BiocManager", quietly = TRUE)) {install.packages("BiocManager")}
+library(BiocManager)
+if (!require(EnhancedVolcano)) {BiocManager::install("EnhancedVolcano")}
+library(EnhancedVolcano)
 ```
 
 Read the package documentation section 3.1, and create a volcano plot of your own.
@@ -259,11 +302,23 @@ Remember that you may need to include par(mar=c(1,1,1,1)) before your plotting f
 
 ```{r}
 # create plot here
+par(mar=c(4,4,4,4))
+EnhancedVolcano(results,
+    lab = rownames(results),
+    x = 'log2FoldChange',
+    y = 'pvalue')
 ```
 
 Skim through section 4 of the package documentation, and create an advanced volcano plot as you see fit. Customize at least one aspect of your plot (ie color, shape, labels, etc.). Save this plot to your week6 folder as a .jpg file. For more info on saving plots, see section 3 of R_Tutorial.Rmd
 
 ```{r}
 # create plot here
+jpeg("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/week8_deseq2/volcano_plot.jpeg")
+par(mar=c(4,4,4,4))
+EnhancedVolcano(results,
+    lab = rownames(results),
+    x = 'log2FoldChange',
+    y = 'pvalue')
+dev.off()
 ```
 
