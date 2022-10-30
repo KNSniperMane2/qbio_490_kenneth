@@ -27,10 +27,20 @@ library(TCGAbiolinks)
 
 ```{r}
 # you can read these in from .csv's or from your .RData file
+<<<<<<< HEAD
 load("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/clinical_maf_rna.RData")
 rna_clinical <- read.csv("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_rna_clinical_data.csv", header = TRUE)
 rna_counts <- read.csv("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_rna_count_data.csv", header = TRUE)
 rna_genes <- read.csv("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/analysis_data/brca_rna_gene_data.csv", header = TRUE)
+=======
+rna_counts <- READ IN
+rna_genes <- READ IN
+rna_clinical <- READ IN
+
+## OR
+
+load("/PATH/TO/workspace_file.RData")
+>>>>>>> 39396c090316fdffce6b03721f577b9adf55411b
 ```
 
 ###### (1) Setting up and preprocessing our data
@@ -145,12 +155,16 @@ resultsNames(dds_obj)  # see what comparisons got run
 
 # get the young vs. old comparison
 ?results
+<<<<<<< HEAD
 results = results(dds_obj, format = "DataFrame", contrast = c("age_category", "young", "old"))
 
 # this is case sensitive so be careful!
 
 load("C:/Users/kenne/OneDrive/Desktop/QBIO490/qbio_490_kenneth/deseq_output.RData")          
 
+=======
+results = results(dds_obj, format = "DataFrame", contrast = c("age_category", "FACTOR 1", "FACTOR 2")) # this is case sensitive so be careful to match it with your age_category factors closely!
+>>>>>>> 39396c090316fdffce6b03721f577b9adf55411b
 ```
 
 ###### (3) Analyzing and saving the data
@@ -188,20 +202,20 @@ First, select rows (genes) that have a padj value < 0.05.
 sig_results <- ifelse(results$padj < 0.05, TRUE, FALSE)
 ```
 
-Now, sort the data frame by log2foldchange, ascending. To do this, use the order() function. The order() function returns a vector of the sorted indexes of your chosen data, from smallest to largest. For example:
+Now, sort the data frame by log2foldchange, descending. To do this, use the order() function. The order() function returns a vector of the sorted indexes of your chosen data, from smallest to largest. For example:
 
-```{r}
-my_df = data.frame(x = c('index 1', 'index 2', 'index 3', 'index 4', 'index 5'),
+```{r EXAMPLE SHOWING HOW ORDER() WORKS}
+my_example_df = data.frame(x = c('index 1', 'index 2', 'index 3', 'index 4', 'index 5'),
                    y = c(2,4,3,5,1))
 
-order_indexes = order(my_df$y) # order by column "y"
+order_indexes = order(my_example_df$y) # order by column "y"
 
 # we would expect order_indexes to be c(5, 1, 3, 2, 4) since the value 2 has the index 5, the value 2 has the index 1, the value 3 has the index 3, etc.
 
 order_indexes
 
-my_df = my_df[order_indexes, ] # this rewrites the df based on the sorted rows
-my_df # check your df to see if it is sorted by the y values
+my_example_df = my_example_df[order_indexes, ] # this rewrites the df based on the sorted rows
+my_example_df # check your df to see if it is sorted by the y values
 ```
 
 Use the logic above as well as the sig_results mask to create a dataframe called up_reg_results. This df should be sorted by log2foldchange descending (take a look at the decreasing argument). Note that this can also be done in one line by bypassing the use of order_indexes as an intermediate variable.
@@ -219,7 +233,7 @@ Rewrite up_sig_results to have only the genes where the log2foldchange is > 1 (i
 up_reg_results = up_reg_results[up_reg_results$log2FoldChange > 1, ]
 ```
 
-Repeat the same steps to create a sorted data frame called down_reg_results (this time select for all genes where log2foldchange is < -1 and sort is ascending by log2foldchange).
+Repeat the same steps to create a sorted data frame called down_reg_results (this time select for all genes where log2foldchange is < -1 and sort it ascending by log2foldchange).
 
 ```{r}
 # write code here
